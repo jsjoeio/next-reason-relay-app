@@ -1,12 +1,19 @@
 {
   "name": "nextjs-default",
-  "namespace": false,
+  "namespace": true,
   "reason": { "react-jsx": 3 },
   "refmt": 3,
-  "bs-dependencies": ["reason-react", "bs-fetch", "@glennsl/bs-json"],
-  "ppx-flags": [],
+  "bs-dependencies": [
+    "bs-fetch",
+    "@glennsl/bs-json",
+    "bs-onegraph-auth",
+    "reason-react",
+    "reason-relay",
+    "reason-promise"
+  ],
+  "ppx-flags": ["reason-relay/ppx"],
   "sources": [
-    { "dir": "common" },
+    { "dir": "common", "subdirs": true },
     { "dir": "bindings" },
     { "dir": "pages", "subdirs": true },
     { "dir": "components", "subdirs": true },

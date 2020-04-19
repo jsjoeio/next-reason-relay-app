@@ -31,10 +31,12 @@ module Navigation = {
 [@react.component]
 let make = (~children) => {
   let minWidth = ReactDOMRe.Style.make(~minWidth="20rem", ());
+  <ReasonRelay.Context.Provider environment=RelayEnv.environment>
   <div style=minWidth className="flex lg:justify-center">
     <div className="max-w-5xl w-full lg:w-3/4 text-gray-900 font-base">
       <Navigation />
       <main className="mt-4 mx-4"> children </main>
     </div>
-  </div>;
+  </div>
+  </ReasonRelay.Context.Provider>;
 };

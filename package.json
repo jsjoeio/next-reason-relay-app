@@ -8,14 +8,25 @@
     "@glennsl/bs-json": "^3.0.0",
     "@zeit/next-css": "^1.0.1",
     "bs-fetch": "^0.3.1",
+    "bs-onegraph-auth": "0.0.5",
     "gentype": "^3.6.0",
+    "graphql": "^15.0.0",
+    "isomorphic-fetch": "^2.2.1",
     "isomorphic-unfetch": "^3.0.0",
     "next": "^9.3.5",
     "next-transpile-modules": "^3.2.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "onegraph-auth": "^2.2.1",
+    "react": "0.0.0-experimental-d28bd2994",
+    "react-dom": "0.0.0-experimental-d28bd2994",
+    "react-relay": "0.0.0-experimental-8cc94ddc",
+    "reason-promise": "^1.0.2",
     "reason-react": "^0.7.0",
-    "request": "^2.88.0"
+    "reason-relay": "^0.8.2",
+    "relay-compiler": "^9.0.0",
+    "relay-config": "^9.0.0",
+    "relay-runtime": "^9.0.0",
+    "request": "^2.88.0",
+    "subscriptions-transport-ws": "^0.9.16"
   },
   "scripts": {
     "dev": "next",
@@ -25,7 +36,9 @@
     "start": "next start -p $PORT",
     "bs:build": "bsb -make-world",
     "bs:clean": "bsb -clean-world",
-    "bs:start": "bsb -make-world -w"
+    "bs:start": "npm run bs:clean && bsb -make-world -w",
+    "relay": "reason-relay-compiler",
+    "relay:watch": "reason-relay-compiler --watch"
   },
   "devDependencies": {
     "autoprefixer": "^9.5.1",
@@ -33,5 +46,9 @@
     "cssnano": "^4.1.10",
     "postcss-easy-import": "^3.0.0",
     "tailwindcss": "1.2.0"
+  },
+  "resolutions": {
+    "react": "0.0.0-experimental-d28bd2994",
+    "react-dom": "0.0.0-experimental-d28bd2994"
   }
 }
