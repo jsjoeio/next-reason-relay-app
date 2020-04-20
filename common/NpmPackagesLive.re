@@ -7,7 +7,6 @@ subscription NpmPackagesLive_PublishSubscription {
         id
         keywords
         name
-        readme
         homepage
         distTags {
           latest {

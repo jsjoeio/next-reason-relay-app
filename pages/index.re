@@ -8,11 +8,62 @@ module P = {
 
 // ask Sean later about GitHubMilestone. looking in module
 
+let loginToGitHub = (~auth, ~onIsLoggedIn, ~onIsNotLoggedIn=?) => {
+  OneGraphAuth.login(auth, "github")
+  |> Js.Promise.then_(() => {
+       OneGraphAuth.isLoggedIn(auth, "github")
+       |> Js.Promise.then_(isLoggedIn => {
+            (
+              switch (isLoggedIn) {
+              | false =>
+                onIsNotLoggedIn->Belt.Option.forEach(onIsNotLoggedIn =>
+                  onIsNotLoggedIn()
+                )
+              | true => onIsLoggedIn()
+              }
+            )
+            |> Js.Promise.resolve
+          })
+     });
+};
+
+let logoutOfGitHub = (~auth, ~onIsLoggedIn=?, ~onIsNotLoggedIn) => {
+  OneGraphAuth.logout(auth, "github", ())
+  |> Js.Promise.then_(_ => {
+       OneGraphAuth.isLoggedIn(auth, "github")
+       |> Js.Promise.then_(isLoggedIn => {
+            (
+              switch (isLoggedIn) {
+              | false => onIsNotLoggedIn()
+              | true =>
+                onIsLoggedIn->Belt.Option.forEach(onIsLoggedIn =>
+                  onIsLoggedIn()
+                )
+              }
+            )
+            |> Js.Promise.resolve
+          })
+     });
+};
+
 [@react.component]
 let make = () => {
+  let (isLoggedIn, setIsLoggedIn) = React.useState(() => None);
   let (packageName, setPackageName) = React.useState(() => "nextjs");
-  let (repo, setRepo) =
+  let (repo, _setRepo) =
     React.useState(() => GitHubMilestone.{name: "blog", owner: "sgrove"});
+
+  /* Determine initial login state */
+  React.useEffect0(() => {
+    Config.auth->Belt.Option.forEach(auth =>
+      OneGraphAuth.isLoggedIn(auth, "github")
+      |> Js.Promise.then_(isLoggedIn => {
+           Js.Promise.resolve(setIsLoggedIn(_ => Some(isLoggedIn)))
+         })
+      |> ignore
+    );
+    None;
+  });
 
   <div>
     <React.Suspense
@@ -62,26 +113,33 @@ let make = () => {
     </React.Suspense>
     <hr />
     <button
-      onClick={_ =>
-        Config.auth->Belt.Option.map(auth => {
-          OneGraphAuth.login(auth, "github")
-          |> Js.Promise.then_(() => {
-               OneGraphAuth.isLoggedIn(auth, "github")
-               |> Js.Promise.then_(isLoggedIn => {
-                    Js.log2("Success? ", isLoggedIn);
-                    (
-                      switch (isLoggedIn) {
-                      | false => Js.log("logged in failed")
-                      | true => Js.log("Logged in success")
-                      }
-                    )
-                    |> Js.Promise.resolve;
-                  })
-             })
-        })
-        |> ignore
-      }>
-      {React.string("Login")}
+      onClick={_ => {
+        switch (Config.auth, isLoggedIn) {
+        | (Some(auth), Some(true)) =>
+          logoutOfGitHub(
+            ~auth,
+            ~onIsLoggedIn=() => setIsLoggedIn(_ => Some(true)),
+            ~onIsNotLoggedIn=() => setIsLoggedIn(_ => Some(false)),
+          )
+          ->ignore
+
+        | (Some(auth), Some(false)) =>
+          loginToGitHub(
+            ~auth,
+            ~onIsLoggedIn=() => setIsLoggedIn(_ => Some(true)),
+            ~onIsNotLoggedIn=() => setIsLoggedIn(_ => Some(false)),
+          )
+          ->ignore
+        | _ => ()
+        }
+      }}>
+      {React.string(
+         switch (isLoggedIn) {
+         | Some(true) => "Log out of GitHub"
+         | Some(false) => "Login to GitHub"
+         | None => "Checking your login status..."
+         },
+       )}
     </button>
   </div>;
 };

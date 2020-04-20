@@ -36,7 +36,6 @@ module Types = {
     id: option(string),
     keywords: option(array(string)),
     name: option(string),
-    readme: option(string),
     homepage: option(string),
     distTags: option(response_npm_allPublishActivity_package_distTags),
     repository: option(response_npm_allPublishActivity_package_repository),
@@ -81,7 +80,7 @@ let wrap_response_npm_allPublishActivity_package_repository_sourceRepository:
 module Internal = {
   type responseRaw;
   let responseConverter: Js.Dict.t(Js.Dict.t(Js.Dict.t(string))) = [%raw
-    {json| {"__root":{"npm_allPublishActivity":{"n":""},"npm_allPublishActivity_package_id":{"n":""},"npm_allPublishActivity_package_keywords":{"n":""},"npm_allPublishActivity_package_name":{"n":""},"npm_allPublishActivity_package_readme":{"n":""},"npm_allPublishActivity_package_homepage":{"n":""},"npm_allPublishActivity_package_distTags":{"n":""},"npm_allPublishActivity_package_distTags_latest":{"n":""},"npm_allPublishActivity_package_distTags_latest_versionString":{"n":""},"npm_allPublishActivity_package_repository":{"n":""},"npm_allPublishActivity_package_repository_sourceRepository":{"n":"","u":"response_npm_allPublishActivity_package_repository_sourceRepository"}}} |json}
+    {json| {"__root":{"npm_allPublishActivity":{"n":""},"npm_allPublishActivity_package_id":{"n":""},"npm_allPublishActivity_package_keywords":{"n":""},"npm_allPublishActivity_package_name":{"n":""},"npm_allPublishActivity_package_homepage":{"n":""},"npm_allPublishActivity_package_distTags":{"n":""},"npm_allPublishActivity_package_distTags_latest":{"n":""},"npm_allPublishActivity_package_distTags_latest_versionString":{"n":""},"npm_allPublishActivity_package_repository":{"n":""},"npm_allPublishActivity_package_repository_sourceRepository":{"n":"","u":"response_npm_allPublishActivity_package_repository_sourceRepository"}}} |json}
   ];
   let responseConverterMap = {
     "response_npm_allPublishActivity_package_repository_sourceRepository": unwrap_response_npm_allPublishActivity_package_repository_sourceRepository,
@@ -164,13 +163,6 @@ v2 = [
                 "storageKey": null
               },
               (v1/*: any*/),
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "readme",
-                "args": null,
-                "storageKey": null
-              },
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -308,7 +300,7 @@ return {
     "operationKind": "subscription",
     "name": "NpmPackagesLive_PublishSubscription",
     "id": null,
-    "text": "subscription NpmPackagesLive_PublishSubscription {\n  npm {\n    allPublishActivity {\n      package {\n        id\n        keywords\n        name\n        readme\n        homepage\n        distTags {\n          latest {\n            versionString\n          }\n        }\n        repository {\n          sourceRepository {\n            __typename\n            ... on GitHubRepository {\n              id\n              name\n              issues(first: 10, orderBy: {direction: DESC, field: CREATED_AT}, states: OPEN) {\n                totalCount\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}\n",
+    "text": "subscription NpmPackagesLive_PublishSubscription {\n  npm {\n    allPublishActivity {\n      package {\n        id\n        keywords\n        name\n        homepage\n        distTags {\n          latest {\n            versionString\n          }\n        }\n        repository {\n          sourceRepository {\n            __typename\n            ... on GitHubRepository {\n              id\n              name\n              issues(first: 10, orderBy: {direction: DESC, field: CREATED_AT}, states: OPEN) {\n                totalCount\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}\n",
     "metadata": {}
   }
 };
