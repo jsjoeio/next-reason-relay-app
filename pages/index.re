@@ -8,50 +8,15 @@ module P = {
 
 // ask Sean later about GitHubMilestone. looking in module
 
-let loginToGitHub = (~auth, ~onIsLoggedIn, ~onIsNotLoggedIn=?) => {
-  OneGraphAuth.login(auth, "github")
-  |> Js.Promise.then_(() => {
-       OneGraphAuth.isLoggedIn(auth, "github")
-       |> Js.Promise.then_(isLoggedIn => {
-            (
-              switch (isLoggedIn) {
-              | false =>
-                onIsNotLoggedIn->Belt.Option.forEach(onIsNotLoggedIn =>
-                  onIsNotLoggedIn()
-                )
-              | true => onIsLoggedIn()
-              }
-            )
-            |> Js.Promise.resolve
-          })
-     });
-};
-
-let logoutOfGitHub = (~auth, ~onIsLoggedIn=?, ~onIsNotLoggedIn) => {
-  OneGraphAuth.logout(auth, "github", ())
-  |> Js.Promise.then_(_ => {
-       OneGraphAuth.isLoggedIn(auth, "github")
-       |> Js.Promise.then_(isLoggedIn => {
-            (
-              switch (isLoggedIn) {
-              | false => onIsNotLoggedIn()
-              | true =>
-                onIsLoggedIn->Belt.Option.forEach(onIsLoggedIn =>
-                  onIsLoggedIn()
-                )
-              }
-            )
-            |> Js.Promise.resolve
-          })
-     });
-};
-
 [@react.component]
 let make = () => {
   let (isLoggedIn, setIsLoggedIn) = React.useState(() => None);
   let (packageName, setPackageName) = React.useState(() => "nextjs");
   let (repo, _setRepo) =
     React.useState(() => GitHubMilestone.{name: "blog", owner: "sgrove"});
+
+  let onIsLoggedIn = () => setIsLoggedIn(_ => Some(true));
+  let onIsNotLoggedIn = () => setIsLoggedIn(_ => Some(false));
 
   /* Determine initial login state */
   React.useEffect0(() => {
@@ -115,19 +80,20 @@ let make = () => {
     <button
       onClick={_ => {
         switch (Config.auth, isLoggedIn) {
-        | (Some(auth), Some(true)) =>
-          logoutOfGitHub(
+        | (Some(auth), Some(false)) =>
+          OneGraphUtils.loginToGitHub(
             ~auth,
-            ~onIsLoggedIn=() => setIsLoggedIn(_ => Some(true)),
-            ~onIsNotLoggedIn=() => setIsLoggedIn(_ => Some(false)),
+            ~onIsLoggedIn,
+            ~onIsNotLoggedIn,
+            (),
           )
           ->ignore
-
-        | (Some(auth), Some(false)) =>
-          loginToGitHub(
+        | (Some(auth), Some(true)) =>
+          OneGraphUtils.logoutOfGitHub(
             ~auth,
-            ~onIsLoggedIn=() => setIsLoggedIn(_ => Some(true)),
-            ~onIsNotLoggedIn=() => setIsLoggedIn(_ => Some(false)),
+            ~onIsLoggedIn,
+            ~onIsNotLoggedIn,
+            (),
           )
           ->ignore
         | _ => ()
