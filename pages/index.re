@@ -9,14 +9,56 @@ module P = {
 // ask Sean later about GitHubMilestone. looking in module
 
 [@react.component]
-let make = () =>
+let make = () => {
+  let (packageName, setPackageName) = React.useState(() => "nextjs");
+  let (repo, setRepo) =
+    React.useState(() => GitHubMilestone.{name: "blog", owner: "sgrove"});
+
   <div>
     <React.Suspense
-      fallback={<div> "One second, loading..."->React.string </div>}>
-      <GitHubMilestone
-        repo=GitHubMilestone.{name: "test-goal-tracker", owner: "jsjoeio"}
+      fallback={<div> "One second, loading milestones..."->React.string </div>}>
+      <h1 className="text-3xl font-semibold">
+        "GitHubMilestones: "->React.string
+      </h1>
+      <GitHubMilestone repo />
+    </React.Suspense>
+    <br />
+    <h1 className="text-3xl font-semibold">
+      {j|npm downloads for|j}->React.string
+      <input
+        type_="text"
+        defaultValue=packageName
+        onKeyDown={event => {
+          let key = ReactEvent.Keyboard.key(event);
+          switch (key) {
+          | "Enter" =>
+            ReactEvent.Keyboard.preventDefault(event);
+            ReactEvent.Keyboard.stopPropagation(event);
+            let newPackageName = ReactEvent.Keyboard.target(event)##value;
+            setPackageName(_ => newPackageName);
+          | _ => ()
+          };
+        }}
       />
-      <UserProfile name="nextjs" />
+      {j|package:|j}->React.string
+    </h1>
+    <React.Suspense
+      fallback={
+        <div>
+          {j|One second, loading npm download stats for $packageName...|j}
+          ->React.string
+        </div>
+      }>
+      <UserProfile name=packageName />
+    </React.Suspense>
+    <br />
+    <React.Suspense
+      fallback={<div> "One second, loading milestones..."->React.string </div>}>
+      <h1 className="text-3xl font-semibold">
+        "Live npm subscription with optional GitHub data: "->React.string
+      </h1>
+      <br />
+      <NpmPackagesLive />
     </React.Suspense>
     <hr />
     <button
@@ -41,25 +83,7 @@ let make = () =>
       }>
       {React.string("Login")}
     </button>
-    <h1 className="text-3xl font-semibold">
-      "What :rock is this about?"->ReasonReact.string
-    </h1>
-    <P>
-      {j| This is 😃iscool! worldThis is a simple template for a Next
-      project using Reason & TailwindCSS.|j}
-      ->React.string
-    </P>
-    <h2 className="text-2xl font-semibold mt-5">
-      "Quick Start"->React.string
-    </h2>
-    <P>
-      <pre>
-        {j|git clone https://github.com/ryyppy/nextjs-default.git my-project
-cd my-project
-rm -rf .git|j}
-        ->React.string
-      </pre>
-    </P>
   </div>;
+};
 
 let default = make;

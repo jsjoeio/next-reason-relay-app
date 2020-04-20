@@ -17,11 +17,9 @@ let fetchQuery: ReasonRelay.Network.fetchFunctionPromise =
     let authHeader =
       Config.auth->Belt.Option.flatMap(auth => authHeaders(auth));
 
-    Js.log3("auth", Config.auth, authHeader);
-
     Fetch.(
       fetchWithInit(
-        Config.httpUri,
+        Config.oneGraphUrl,
         RequestInit.make(
           ~method_=Post,
           ~body=
@@ -56,7 +54,7 @@ let fetchQuery: ReasonRelay.Network.fetchFunctionPromise =
 let network =
   ReasonRelay.Network.makePromiseBased(
     ~fetchFunction=fetchQuery,
-    // ~subscriptionFunction=Config.subscriptionFunction,
+    ~subscriptionFunction=?Config.subscriptionFunction,
     (),
   );
 

@@ -68,7 +68,9 @@ let make = (~repo=default) => {
       {j|Found Milestones: $milestoneCount|j}->React.string
       {milestones
        ->Belt.Array.map(milestone =>
-           <Milestone gitHubMilestone={milestone.getFragmentRefs()} />
+           <div>
+             <Milestone gitHubMilestone={milestone.getFragmentRefs()} />
+           </div>
          )
        ->React.array}
     </div>;

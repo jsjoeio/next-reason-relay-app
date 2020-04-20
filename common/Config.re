@@ -13,58 +13,39 @@ let authConfig =
 
 let auth = isSsr ? None : Some(OneGraphAuth.create(authConfig));
 
-let host =
-  Env.isProd ? "https://serve.onegraph.com" : "https://serve.onegraph.com";
+let oneGraphSubscriptionClient =
+  auth->Belt.Option.map(oneGraphAuth =>
+    OneGraphSubscriptionClient.make(appId, {oneGraphAuth: oneGraphAuth})
+  );
 
-// let authConfig = OneGraphAuth.createOptions(~appId, ~oneGraphOrigin, ());
+/* Subscriptions to OneGraph will work server-side, but just disable them in SSR for now. */
+let subscriptionFunction: option(ReasonRelay.Network.subscribeFn) =
+  oneGraphSubscriptionClient->Belt.Option.map(
+    (
+      oneGraphSubscriptionClient,
+      operation: ReasonRelay.Network.operation,
+      variables: Js.Json.t,
+      _cacheConfig: ReasonRelay.cacheConfig,
+    ) => {
+    let subscribeObservable =
+      oneGraphSubscriptionClient->OneGraphSubscriptionClient.request({
+        "query": operation.text,
+        "variables": variables,
+        "operationName": operation.name,
+      });
 
-// let auth = isSsr ? None : Some(OneGraphAuth.create(authConfig));
+    let observable =
+      ReasonRelay.Observable.make(sink => {
+        subscribeObservable
+        ->OneGraphSubscriptionClient.subscribe({
+            "next": data => {
+              sink.next(data);
+            },
+            "error": sink.error,
+            "complete": sink.completed,
+          })
+        ->ignore
+      });
 
-// let host = Env.isProd ? "serve.apilaw.com" : "10.0.1.16:8080";
-
-let httpUri = oneGraphUrl;
-
-
-// let webSocketUri =
-//   Env.isProd ? {j|wss://$host/v1/graphql|j} : {j|ws://$host/v1/graphql|j};
-
-// module WSSubscriptClient = {
-//   type subClient;
-//   type newSubscriptionClientOptions = {reconnect: bool};
-//   [@bs.module "subscriptions-transport-ws"] [@bs.new]
-//   external make: (string, newSubscriptionClientOptions) => subClient =
-//     "SubscriptionClient";
-
-//   type observable;
-//   [@bs.send]
-//   external request: (subClient, Js.t('a)) => observable = "request";
-//   [@bs.send] external subscribe: (observable, Js.t('a)) => unit = "subscribe";
-// };
-
-// let subscriptionClient =
-//   WSSubscriptClient.make(webSocketUri, {reconnect: true});
-
-// let subscriptionFunction: ReasonRelay.Network.subscribeFn =
-//   (operation, variables: Js.Json.t, _cacheConfig: ReasonRelay.cacheConfig) => {
-//     let subscribeObservable =
-//       subscriptionClient->WSSubscriptClient.request({
-//         "query": operation.text,
-//         "variables": variables,
-//         "operationName": operation.name,
-//       });
-
-//     let observable =
-//       ReasonRelay.Observable.make(sink => {
-//         subscribeObservable
-//         ->WSSubscriptClient.subscribe({
-//             "next": data => {
-//               sink.next(data);
-//             },
-//             "error": sink.error,
-//             "complete": sink.completed,
-//           })
-//         ->ignore
-//       });
-
-//     observable;
-//   };
+    observable;
+  });
