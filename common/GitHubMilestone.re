@@ -21,23 +21,6 @@ query GitHubMilestoneQuery(
 |}
 ];
 
-module SpotifySearchQuery = [%relay.query
-  {|
-  query GitHubMilestone_SpotifySearchQuery(
-    $query: String = "you and i dash berlin"
-  ) {
-    spotify {
-      search(data: { query: $query }) {
-        tracks {
-          id
-          name
-        }
-      }
-    }
-  }
-|}
-];
-
 // this is one unit
 type repo = {
   owner: string,
