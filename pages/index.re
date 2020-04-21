@@ -9,57 +9,105 @@ module P = {
 // ask Sean later about GitHubMilestone. looking in module
 
 [@react.component]
-let make = () =>
+let make = () => {
+  let (isLoggedIn, setIsLoggedIn) = React.useState(() => None);
+  let (packageName, setPackageName) = React.useState(() => "nextjs");
+  let (repo, _setRepo) =
+    React.useState(() => GitHubMilestone.{name: "blog", owner: "sgrove"});
+
+  let onIsLoggedIn = () => setIsLoggedIn(_ => Some(true));
+  let onIsNotLoggedIn = () => setIsLoggedIn(_ => Some(false));
+
+  /* Determine initial login state */
+  React.useEffect0(() => {
+    Config.auth->Belt.Option.forEach(auth =>
+      OneGraphAuth.isLoggedIn(auth, "github")
+      |> Js.Promise.then_(isLoggedIn => {
+           Js.Promise.resolve(setIsLoggedIn(_ => Some(isLoggedIn)))
+         })
+      |> ignore
+    );
+    None;
+  });
+
   <div>
     <React.Suspense
-      fallback={<div> "One second, loading..."->React.string </div>}>
-      <GitHubMilestone
-        repo=GitHubMilestone.{name: "test-goal-tracker", owner: "jsjoeio"}
+      fallback={<div> "One second, loading milestones..."->React.string </div>}>
+      <h1 className="text-3xl font-semibold">
+        "GitHubMilestones: "->React.string
+      </h1>
+      <GitHubMilestone repo />
+    </React.Suspense>
+    <br />
+    <h1 className="text-3xl font-semibold">
+      {j|npm downloads for|j}->React.string
+      <input
+        type_="text"
+        defaultValue=packageName
+        onKeyDown={event => {
+          let key = ReactEvent.Keyboard.key(event);
+          switch (key) {
+          | "Enter" =>
+            ReactEvent.Keyboard.preventDefault(event);
+            ReactEvent.Keyboard.stopPropagation(event);
+            let newPackageName = ReactEvent.Keyboard.target(event)##value;
+            setPackageName(_ => newPackageName);
+          | _ => ()
+          };
+        }}
       />
-      <UserProfile name="nextjs" />
+      {j|package:|j}->React.string
+    </h1>
+    <React.Suspense
+      fallback={
+        <div>
+          {j|One second, loading npm download stats for $packageName...|j}
+          ->React.string
+        </div>
+      }>
+      <UserProfile name=packageName />
+    </React.Suspense>
+    <br />
+    <React.Suspense
+      fallback={<div> "One second, loading milestones..."->React.string </div>}>
+      <h1 className="text-3xl font-semibold">
+        "Live npm subscription with optional GitHub data: "->React.string
+      </h1>
+      <br />
+      <NpmPackagesLive />
     </React.Suspense>
     <hr />
     <button
-      onClick={_ =>
-        Config.auth->Belt.Option.map(auth => {
-          OneGraphAuth.login(auth, "github")
-          |> Js.Promise.then_(() => {
-               OneGraphAuth.isLoggedIn(auth, "github")
-               |> Js.Promise.then_(isLoggedIn => {
-                    Js.log2("Success? ", isLoggedIn);
-                    (
-                      switch (isLoggedIn) {
-                      | false => Js.log("logged in failed")
-                      | true => Js.log("Logged in success")
-                      }
-                    )
-                    |> Js.Promise.resolve;
-                  })
-             })
-        })
-        |> ignore
-      }>
-      {React.string("Login")}
+      onClick={_ => {
+        switch (Config.auth, isLoggedIn) {
+        | (Some(auth), Some(false)) =>
+          OneGraphUtils.loginToGitHub(
+            ~auth,
+            ~onIsLoggedIn,
+            ~onIsNotLoggedIn,
+            (),
+          )
+          ->ignore
+        | (Some(auth), Some(true)) =>
+          OneGraphUtils.logoutOfGitHub(
+            ~auth,
+            ~onIsLoggedIn,
+            ~onIsNotLoggedIn,
+            (),
+          )
+          ->ignore
+        | _ => ()
+        }
+      }}>
+      {React.string(
+         switch (isLoggedIn) {
+         | Some(true) => "Log out of GitHub"
+         | Some(false) => "Login to GitHub"
+         | None => "Checking your login status..."
+         },
+       )}
     </button>
-    <h1 className="text-3xl font-semibold">
-      "What :rock is this about?"->ReasonReact.string
-    </h1>
-    <P>
-      {j| This is 😃iscool! worldThis is a simple template for a Next
-      project using Reason & TailwindCSS.|j}
-      ->React.string
-    </P>
-    <h2 className="text-2xl font-semibold mt-5">
-      "Quick Start"->React.string
-    </h2>
-    <P>
-      <pre>
-        {j|git clone https://github.com/ryyppy/nextjs-default.git my-project
-cd my-project
-rm -rf .git|j}
-        ->React.string
-      </pre>
-    </P>
   </div>;
+};
 
 let default = make;
