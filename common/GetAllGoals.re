@@ -54,6 +54,14 @@ let make = (~repo=default) => {
   let queryData =
     Query.use(~variables={repoOwner: owner, repoName: name}, ());
   ();
+
+  switch (queryData) {
+  | {gitHub: Some({repository: Some({projects})})} =>
+    Js.log(projects);
+    let thing = "test";
+    <div> {React.string("It worked")} </div>;
+  | _ => React.null
+  };
   // switch (queryData) {
   // | {gitHub: Some({repository: Some({milestones})})} =>
   //   let milestones =

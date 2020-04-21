@@ -15,6 +15,10 @@ let make = () => {
   let (repo, _setRepo) =
     React.useState(() => GitHubMilestone.{name: "blog", owner: "sgrove"});
 
+  let (otherRepo, _setOtherRepo) =
+    React.useState(() =>
+      GetAllGoals.{name: "test-goal-tracker", owner: "jsjoeio"}
+    );
   let onIsLoggedIn = () => setIsLoggedIn(_ => Some(true));
   let onIsNotLoggedIn = () => setIsLoggedIn(_ => Some(false));
 
@@ -37,6 +41,10 @@ let make = () => {
         "GitHubMilestones: "->React.string
       </h1>
       <GitHubMilestone repo />
+      <h1 className="text-3xl font-semibold">
+        "Your Goals: "->React.string
+      </h1>
+      <GetAllGoals repo=otherRepo />
     </React.Suspense>
     <br />
     <h1 className="text-3xl font-semibold">
