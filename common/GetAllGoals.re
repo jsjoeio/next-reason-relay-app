@@ -56,29 +56,24 @@ let make = (~repo=default) => {
   ();
 
   switch (queryData) {
-  | {gitHub: Some({repository: Some({projects})})} =>
-    Js.log(projects);
-    let thing = "test";
-    <div> {React.string("It worked")} </div>;
+  | {gitHub: Some({repository: Some({projects: {edges: Some(nodes)}})})} =>
+    let projects =
+      nodes->Belt.Array.map(node => {
+        switch (node) {
+        | Some({node: Some({name, createdAt, id, body})}) =>
+          <div key=id>
+            <h3> {React.string(name)} </h3>
+            {switch (body) {
+             | Some(body) => <p> {React.string(body)} </p>
+             | _ => React.null
+             }}
+            <p> {j|Created at: $createdAt|j}->React.string </p>
+          </div>
+        | _ => React.null
+        }
+      });
+
+    <div> {React.array(projects)} </div>;
   | _ => React.null
   };
-  // switch (queryData) {
-  // | {gitHub: Some({repository: Some({milestones})})} =>
-  //   let milestones =
-  //     GitHubMilestoneQuery_graphql.Utils.getConnectionNodes_milestones(
-  //       milestones,
-  //     );
-  //   let milestoneCount = milestones->Belt.Array.length->string_of_int;
-  //   <div>
-  //     {j|Found Milestones: $milestoneCount|j}->React.string
-  //     {milestones
-  //      ->Belt.Array.map(milestone =>
-  //          <div>
-  //            <Milestone gitHubMilestone={milestone.getFragmentRefs()} />
-  //          </div>
-  //        )
-  //      ->React.array}
-  //   </div>;
-  // | _ => React.null
-  // };
 };
