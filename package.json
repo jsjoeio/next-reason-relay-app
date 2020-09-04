@@ -17,7 +17,7 @@
     "next-transpile-modules": "^3.2.0",
     "onegraph-auth": "^2.2.1",
     "onegraph-subscription-client": "^2.2.3",
-    "react": "0.0.0-experimental-d28bd2994",
+    "react": "0.14.0",
     "react-dom": "0.0.0-experimental-d28bd2994",
     "react-relay": "0.0.0-experimental-8cc94ddc",
     "reason-promise": "^1.0.2",
@@ -49,7 +49,7 @@
     "tailwindcss": "1.2.0"
   },
   "resolutions": {
-    "react": "0.0.0-experimental-d28bd2994",
+    "react": "0.14.0",
     "react-dom": "0.0.0-experimental-d28bd2994"
   }
 }
